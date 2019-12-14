@@ -12,13 +12,13 @@ In order to build dwm you need the Xlib header files.
 
 ## Installation
 
-Edit config.mk to match your local setup (dwm is installed into
-the /usr/local namespace by default).
+st is installed into the `/usr/local` namespace by default(if necessary as root):
 
-Afterwards enter the following command to build and install dwm (if
-necessary as root):
+    make -j clean install
 
-    make clean install
+You can change it by setting `PREFIX` (for example, install at `~/.local`):
+
+    make PREFIX=~/.local -j clean install
 
 
 ## Running dwm
