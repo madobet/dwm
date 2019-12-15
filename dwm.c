@@ -1639,9 +1639,7 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	if (arg->v == dmenurun)
-		dmenumon[0] = '0' + selmon->num;
-  	if (arg->v == dmenuapp)
+	if ((arg->v == dmenucmd) || (arg->v == dmenuapp) || (arg->v == dclipboard))
 		dmenumon[0] = '0' + selmon->num;
 	if (fork() == 0) {
 		if (dpy)
