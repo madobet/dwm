@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <X11/XF86keysym.h>
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
@@ -10,8 +11,9 @@ static const int systraypinningfailfirst = 1;   /* 1: if pinning fails, display 
 static const int showsystray        = 1;     /* 0 means no systray */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "Iosevka Term:size=10", "monospace:size=10" };
-static const char dmenufont[]           = "Iosevka Term:size=10";
+static const char *fonts[]          = { "monospace:size=10" };
+// static const char *fonts[]          = { "Iosevka Term:size=10", "monospace:size=10" };
+static const char dmenufont[]           = "monospace:size=10";
 static const char col_gray1[]           = "#222222";
 static const char col_gray2[]           = "#444444";
 static const char col_gray3[]           = "#bbbbbb";
@@ -55,8 +57,10 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
-	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
+	{ "Gimp",      NULL,       NULL,       0,            1,           -1 },
+	{ "Firefox",   NULL,       NULL,       1 << 8,       0,           -1 },
+	{ NULL,        NULL,  "floating_term", 0,            1,           -1 },
+	{ "Tilda",     NULL,       NULL,       0,            1,           -1 },
 };
 
 /* layout(s) */
@@ -86,20 +90,34 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() dmenu 的显示器输出？*/
-// static const char *dmenucmd[]   = { "dmenu_path" ,"|" ,"dmenu" ,"-b" ,"-f" ,"-i" ,"-l" ,"18" ,"-p" ,"" ,"-fn" ,"monospace-9:Medium" ,"-bd" ,"1" ,"-w" ,"618" ,"-c" ,"-F" ,"-H" ,"${XDG_CACHE_HOME:-~/.cache}/runmenu.history" ,"|" ,"${SHELL:-'/bin/sh'}" ,"&" , NULL};
-static const char *dmenucmd[]   = { "dmenu_path" ,"|" ,"dmenu" ,"-b" ,"-f" ,"-i" ,"-l" ,"18" ,"-p" ,"" ,"-fn" ,"monospace-9:Medium" ,"-bd" ,"1" ,"-w" ,"618" ,"-c" ,"-F" ,"-H" ,"${XDG_CACHE_HOME:-~/.cache}/runmenu.history" , NULL};
-static const char *dmenuapp[]   = { "rofi", "-columns", "2", "-show-icons", "-icon-theme", "Papirus", "-no-lazy-grab", "-show", "drun", "-theme", "themes/appsmenu.rasi", NULL };
-static const char *dclipboard[] = { "clipboard", NULL };
+static const char *dmenurun[]   = { NULL };
+static const char *cmdlock[] 	= {"dm-tool", "lock", NULL};
+// static const char *dmenuapp[]   = { "dmenu_path" ,"|" ,"dmenu" ,"-b" ,"-f" ,"-i" ,"-l" ,"18" ,"-p" ,"" ,"-fn" ,"monospace-9:Medium" ,"-bd" ,"1" ,"-w" ,"618" ,"-c" ,"-F" ,"-H" ,"${XDG_CACHE_HOME:-~/.cache}/runmenu.history" ,"|" ,"${SHELL:-'/bin/sh'}" ,"&" , NULL};
+static const char *dmenuapp[]   = { "dmenu_path" ,"|" ,"dmenu" ,"-b" ,"-f" ,"-i" ,"-l" ,"18" ,"-p" ,"" ,"-fn" ,"monospace-9:Medium" ,"-bd" ,"1" ,"-w" ,"618" ,"-c" ,"-F" ,"-H" ,"${XDG_CACHE_HOME:-~/.cache}/runmenu.history" , NULL};
+static const char *appmenu[]    = { "rofi", "-columns", "2", "-show-icons", "-icon-theme", "Papirus", "-no-lazy-grab", "-show", "drun", "-theme", "themes/appsmenu.rasi", NULL};
 static const char *copyqboard[] = { "copyq", "toggle", NULL };
-static const char *termmain[]   = { "xterm", NULL };
-static const char *termbakup[]  = { "urxvt", NULL };
+static const char *termmain[]   = { "st",      NULL };
+static const char *termbakup[]  = { "xterm",   NULL };
+static const char *filemanag[]  = { "pcmanfm", NULL };
+static const char *volumeup[]   = { "pactl", "set-sink-volume", "@DEFAULT_SINK@", "+5%", NULL };
+static const char *volumedown[] = { "pactl", "set-sink-volume", "@DEFAULT_SINK@", "-5%", NULL };
+static const char *mute[]       = { "pactl", "set-sink-volume", "@DEFAULT_SINK@", "toggle", NULL };
+static const char *micmute[]    = { "pactl", "set-source-mute", "@DEFAULT_SOURCE@", "toggle", NULL };
+static const char *brightup[]   = { "xbacklight", "-inc", "5", NULL };
+static const char *brightdown[] = { "xbacklight", "-dec", "5", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
-	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
-	{ MODKEY,                       XK_s,      spawn,          {.v = dmenuapp } },
-    { MODKEY,                       XK_c,      spawn,          {.v = dclipboard }},
+	{ MODKEY|ShiftMask,             XK_l,      spawn,     	   {.v = cmdlock } },
+	{ MODKEY,                       XK_s,      spawn,          {.v = appmenu }},
     { MODKEY,                       XK_q,      spawn,          {.v = copyqboard }},
+    { MODKEY,                       XK_e,      spawn,          {.v = filemanag }},
+    { 0,         XF86XK_AudioRaiseVolume,      spawn,          {.v = volumeup }},
+    { 0,         XF86XK_AudioLowerVolume,      spawn,          {.v = volumedown }},
+	{ 0,                XF86XK_AudioMute,      spawn,          {.v = mute    }},
+	{ 0,             XF86XK_AudioMicMute,      spawn,          {.v = micmute }},
+    { 0,          XF86XK_MonBrightnessUp,      spawn,          {.v = brightup }},
+    { 0,        XF86XK_MonBrightnessDown,      spawn,          {.v = brightdown }},
 	{ MODKEY,                       XK_Return, spawn,          {.v = termmain } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termbakup } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
